@@ -27,4 +27,6 @@ class Books(models.Model):
 class BooksManagement(models.Model):
     book = models.ForeignKey(Books,on_delete=models.CASCADE)
     user = models.ForeignKey(User,on_delete=models.CASCADE)
+    status = models.CharField(max_length=50,default='borrowed')
+    
     
