@@ -13,7 +13,7 @@ from rest_framework.permissions import BasePermission
 # models
 from users.models import User,Books
 # serializers
-from users.serializer import LibrarianSerilizer,MemberSerilizer,BookSerializer
+from users.serializer import LibrarianSerilizer,MemberSerilizer,BookSerializer,MemberManagementSerilizer
 
 
 class RegisterMemberView(APIView):
@@ -113,3 +113,41 @@ class UpdateBooks(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 #######################################################################################
 # add,view,remove,update members
+class AllMembers(APIView):
+    """
+    Getting all the memebers from User table
+    """
+    def get(self, request, format=None):
+        snippets = User.objects.filter(is_memeber=True)
+        serializer = MemberManagementSerilizer(snippets, many=True)
+        return Response(serializer.data)
+        
+class MembersManagement(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk,is_memeber=True)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = MemberManagementSerilizer(user)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = MemberManagementSerilizer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        user = self.get_object(pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+###########################################################################################

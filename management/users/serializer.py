@@ -52,3 +52,19 @@ class BookSerializer(serializers.ModelSerializer):
         model = Books
         fields = ['id','name']
         
+class MemberManagementSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','name','email','is_memeber']
+        # defining the password feild is not showed to the user
+        # after registrations
+    def create(self, validated_data):
+        password = validated_data.pop('password',None)
+        name = validated_data.get('name')
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+            # hashing the password
+        instance.username=name
+        instance.save()
+        return instance
